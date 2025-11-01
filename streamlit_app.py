@@ -18,13 +18,17 @@ if not st.session_state.game_started:
         st.session_state.game_started = True
         st.session_state.reaction_time = None
 
-# Reaktions-Knopf
+# Timer läuft
 if st.session_state.game_started:
-    current_time = time.time()
-    elapsed = current_time - st.session_state.start_time
+    elapsed = time.time() - st.session_state.start_time
 
-    # Button zeigt die aktuelle Zeit
-    if st.button(f"Drücken ({elapsed:.2f} s)"):
+    # Automatisches Refresh alle 100ms
+    st.experimental_rerun() if elapsed < 3 else None
+
+    st.write(f"⏳ Timer: {elapsed:.2f} Sekunden")
+
+    # Reaktions-Knopf
+    if st.button(f"Stop bei {elapsed:.2f} s"):
         st.session_state.reaction_time = elapsed
         st.session_state.game_started = False
 
