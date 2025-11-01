@@ -1,41 +1,46 @@
 import streamlit as st
 import time
-import random
 
-st.title("🕹️ Reaktionsspiel: Drücke bei 3!")
-
-if "game_started" not in st.session_state:
-    st.session_state.game_started = False
-if "number" not in st.session_state:
-    st.session_state.number = None
+# Initialisierung der Session-Variablen
 if "start_time" not in st.session_state:
     st.session_state.start_time = None
-if "reaction_time" not in st.session_state:
-    st.session_state.reaction_time = None
+if "elapsed_time" not in st.session_state:
+    st.session_state.elapsed_time = 0.0
+if "timer_running" not in st.session_state:
+    st.session_state.timer_running = False
 
-def start_game():
-    st.session_state.game_started = True
-    st.session_state.reaction_time = None
-    st.session_state.number = None
-    st.session_state.start_time = None
-
-    st.write("Bereit... gleich geht's los!")
-    time.sleep(random.uniform(2, 5))  # Zufällige Wartezeit
-    st.session_state.number = random.randint(1, 3)
+# Funktion zum Starten des Timers
+def start_timer():
     st.session_state.start_time = time.time()
+    st.session_state.timer_running = True
 
-start_button = st.button("Spiel starten", on_click=start_game)
+# Funktion zum Stoppen des Timers
+def stop_timer():
+    if st.session_state.start_time:
+        st.session_state.elapsed_time = time.time() - st.session_state.start_time
+    st.session_state.timer_running = False
 
-if st.session_state.game_started and st.session_state.number is not None:
-    st.write(f"Zahl: **{st.session_state.number}**")
+st.title("⏱️ Reaktionsspiel: Drücke bei 3 Sekunden!")
 
-    if st.session_state.number == 3:
-        if st.button("Jetzt drücken!"):
-            st.session_state.reaction_time = time.time() - st.session_state.start_time
-            st.write(f"🎉 Deine Reaktionszeit: **{st.session_state.reaction_time:.3f} Sekunden**")
-            st.session_state.game_started = False
-    else:
-        st.write("Nicht drücken! Das war nicht die 3.")
-        if st.button("Gedrückt..."):
-            st.write("❌ Falsch gedrückt! War nicht die 3.")
-            st.session_state.game_started = False
+# Start-Button
+if st.button("Start"):
+    start_timer()
+
+# Timer-Anzeige
+if st.session_state.timer_running:
+    current_time = time.time()
+    elapsed = current_time - st.session_state.start_time
+    st.write(f"⏳ Zeit: {elapsed:.2f} Sekunden")
+
+    # Automatisches Stoppen bei 3 Sekunden
+    if elapsed >= 3:
+        stop_timer()
+
+# Stop-Button mit Zeitanzeige
+if st.session_state.timer_running:
+    if st.button(f"Stop bei {time.time() - st.session_state.start_time:.2f} s"):
+        stop_timer()
+
+# Ergebnisanzeige
+if not st.session_state.timer_running and st.session_state.elapsed_time > 0:
+    st.success(f"🎉 Deine Reaktionszeit: {st.session_state.elapsed_time:.3f} Sekunden")
